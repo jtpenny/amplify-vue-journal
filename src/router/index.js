@@ -15,6 +15,8 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import { Menu, Home, Profile } from '@/components';
 import { Notes } from '@/notes';
+import { Note } from '@/notes';
+import { New as NewNote } from '@/notes';
 import { components, AmplifyEventBus } from 'aws-amplify-vue';
 import Amplify, * as AmplifyModules from 'aws-amplify';
 import { AmplifyPlugin } from 'aws-amplify-vue';
@@ -68,9 +70,18 @@ const router = new Router({
       path: '/notes',
       name: 'Notes',
       component: Notes,
-      params: {
-        'foo': 'bar'
-      },
+      meta: { requiresAuth: true}
+    },
+    {
+      path: '/note/create',
+      name: 'NewNote',
+      component: NewNote,
+      meta: { requiresAuth: true}
+    },
+    {
+      path: '/note/:id',
+      name: 'Note',
+      component: Note,
       meta: { requiresAuth: true}
     },
     {

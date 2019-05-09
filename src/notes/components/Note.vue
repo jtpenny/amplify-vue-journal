@@ -12,54 +12,90 @@
  */
 
 <template>
-  <li :style="itemStyle">
-    <div :style="itemStyle.toggle" v-on:click="toggle">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        enable-background="new 0 0 20 20"
-        height="20px" width="20px"
-        viewBox="0 0 32 32"
-        version="1.1"
-        xml:space="preserve"
-      >
-        <path
-          clip-rule="evenodd"
-          d="M27.704,8.397c-0.394-0.391-1.034-0.391-1.428,0  L11.988,22.59l-6.282-6.193c-0.394-0.391-1.034-0.391-1.428,0c-0.394,0.391-0.394,1.024,0,1.414l6.999,6.899  c0.39,0.386,1.039,0.386,1.429,0L27.704,9.811C28.099,9.421,28.099,8.787,27.704,8.397C27.31,8.006,28.099,8.787,27.704,8.397z"
-          fill="#888"
-          fill-rule="evenodd"
-          :fill-opacity="toggleOpacity"
-        />
-      </svg>
-    </div>
-    <div :style="itemStyle.title">{{todo.note}}</div>
-    <div :style="itemStyle.remove" v-on:click="remove">x</div>
-  </li>
+  <ul>
+  <li v-for="(value, key) in entry"> {{key}}:  {{ value }} </li>
+  </ul>
 </template>
-
 <script>
+import Vue from 'vue'
+import { Logger } from 'aws-amplify'
 import { JS } from 'fsts'
 
+import AmplifyStore from '../../store/store'
+
+import  { ListEntries }  from './persist/graphqlActions';
+
+import NotesTheme from '../NotesTheme'
+import Note from './Note'
+
 export default {
-  name: 'Note',
-  props: ['todo', 'theme'],
-  computed: {
-    toggleOpacity: function() { return this.todo.done? 1 : 0 },
-    itemStyle: function () {
-      return this.todo.done
-        ? JS.deepAssign({}, this.theme.item, this.theme.item.done)
-        : this.theme.item
+  name: 'Notes',
+  data () {
+    return {
+      theme: NotesTheme || {},
+      note: '',
+      entry: {},
+      filter: 'all',
+      logger: {},
+      actions: {
+        list: ListEntries,
+      },
     }
   },
+  created() {
+    this.logger = new this.$Amplify.Logger('NOTES_component')
+    this.get();
+  },
+  computed: {
+    userId: function() { return AmplifyStore.state.userId }
+  },
   methods: {
-    toggle() {
-      this.$emit('toggle', this.todo)
-    },
-    remove() {
-      if (this.todo.done) {
-        this.$emit('remove', this.todo.id)
-      }
+    get() {
+      
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, { id : this.$route.params.id }))
+      .then((res) => {
+        console.log(res.data)
+        this.entry = res.data.listJournals.items[0];
+        this.logger.info(`Todo successfully listed`, res)
+      })
+      .catch((e) => {
+        this.logger.error(`Error listing Todos`, e)
+      });
     }
+    /*
+    toggle(todo) {
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.update, {id: todo.id, note: todo.note, done: !todo.done}))
+        .then((res) => {
+          todo.done = !todo.done
+          this.logger.info(`Todo ${todo.id} done status toggled`, res);
+        })
+        .catch((e) => {
+          this.logger.error(`Error toggling Todo ${todo.id} done status`, e)
+        })
+    },
+    remove(id) {
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.delete, {id}))
+      .then((res) => {
+        this.logger.info(`Todo ${id} removed`, res);
+        this.list();
+      })
+      .catch((e) => {
+        this.logger.error(`Error removing Todo ${id}`, e)
+      })
+    },
+    create() {
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.create, {note: this.note, done: true}))
+      .then((res) => {
+        this.logger.info(`Todo created`, res);
+        this.list();
+        this.note = '';
+      })
+      .catch((e) => {
+        this.logger.error(`Error creating Todo`, e)
+      })
+    }
+    */
   }
 }
+
 </script>

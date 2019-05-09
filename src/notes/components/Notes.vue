@@ -14,21 +14,10 @@
 <template>
   <div :style="theme.container">
     <h2 :style="theme.header">Notes</h2>
-    <input
-      :style="theme.input"
-      autofocus
-      v-model="note"
-      v-on:keyup.enter="create"
-    />
+    <router-link :to="'/note/create'">New Entry</router-link><br>
     <ul :style="theme.list">
-      <a-note
-        v-for="todo in todos"
-        :key="todo.id"
-        :todo="todo"
-        :theme="theme"
-        v-on:toggle="toggle"
-        v-on:remove="remove"
-      />
+      <li v-for="entry in journalEntries" v-bind:key="entry.id"><router-link :to="'/note/'+entry.id">{{ entry.title }}</router-link> {{ entry.createdAt }}
+      </li>
     </ul>
   </div>
 </template>
@@ -40,27 +29,20 @@ import { JS } from 'fsts'
 
 import AmplifyStore from '../../store/store'
 
-import  { CreateTodo, ListTodos, UpdateTodo, DeleteTodo }  from './persist/graphqlActions';
+import  { ListEntries }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
-import Note from './Note'
-
-Vue.component('a-note', Note)
 
 export default {
   name: 'Notes',
   data () {
     return {
       theme: NotesTheme || {},
-      note: '',
-      todos: [],
+      journalEntries: [],
       filter: 'all',
       logger: {},
       actions: {
-        create: CreateTodo,
-        list: ListTodos,
-        update: UpdateTodo,
-        delete: DeleteTodo, 
+        list: ListEntries,
       },
     }
   },
@@ -75,44 +57,14 @@ export default {
     list() {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, {}))
       .then((res) => {
-        this.todos = res.data.listTodos.items;
-        this.logger.info(`Todos successfully listed`, res)
+        this.journalEntries = res.data.listJournals.items;
+        this.logger.info(`Entries successfully listed`, res)
       })
       .catch((e) => {
         this.logger.error(`Error listing Todos`, e)
       });
     },
-    toggle(todo) {
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.update, {id: todo.id, note: todo.note, done: !todo.done}))
-        .then((res) => {
-          todo.done = !todo.done
-          this.logger.info(`Todo ${todo.id} done status toggled`, res);
-        })
-        .catch((e) => {
-          this.logger.error(`Error toggling Todo ${todo.id} done status`, e)
-        })
-    },
-    remove(id) {
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.delete, {id}))
-      .then((res) => {
-        this.logger.info(`Todo ${id} removed`, res);
-        this.list();
-      })
-      .catch((e) => {
-        this.logger.error(`Error removing Todo ${id}`, e)
-      })
-    },
-    create() {
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.create, {note: this.note, done: true}))
-      .then((res) => {
-        this.logger.info(`Todo created`, res);
-        this.list();
-        this.note = '';
-      })
-      .catch((e) => {
-        this.logger.error(`Error creating Todo`, e)
-      })
-    }
+    
   }
 }
 </script>

@@ -1,8 +1,19 @@
 const CreateEntry = `mutation createTodo($title: String!, $body: String) {
   createJournal(input: {title: $title,body:$body}) {
+    id
     title
     body
   }
+}`;
+
+const GetEntry = `query($id: ID!) {
+	getJournal(id: $id) {
+	  id
+      title
+      body
+      createdAt
+      updatedAt	
+	}
 }`;
 
 const ListEntries = `query {
@@ -35,6 +46,7 @@ const DeleteTodo = `mutation DeleteTodo($id: ID!) {
 export {
   CreateEntry,
   ListEntries,
+  GetEntry,
   UpdateTodo,
   DeleteTodo
 }

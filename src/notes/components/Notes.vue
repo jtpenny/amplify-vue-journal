@@ -14,9 +14,10 @@
 <template>
   <div :style="theme.container">
     <h2 :style="theme.header">Notes</h2>
-    <router-link :to="'/note/create'">New Entry</router-link><br>
+    <router-link :to="'/note/create'" tag="b-button">New Entry</router-link><br>
     <ul :style="theme.list">
-      <li v-for="entry in journalEntries" v-bind:key="entry.id"><router-link :to="'/note/'+entry.id">{{ entry.title }}</router-link> {{ entry.createdAt }}
+      <li v-for="entry in journalEntries" v-bind:key="entry.id">
+        <router-link :to="'/note/'+entry.id">{{ entry.title }}</router-link> {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }}
       </li>
     </ul>
   </div>
@@ -26,12 +27,15 @@
 import Vue from 'vue'
 import { Logger } from 'aws-amplify'
 import { JS } from 'fsts'
+import moment from 'moment'
 
 import AmplifyStore from '../../store/store'
 
 import  { ListEntries }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
+
+
 
 export default {
   name: 'Notes',
@@ -57,7 +61,7 @@ export default {
     list() {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, {}))
       .then((res) => {
-        this.journalEntries = res.data.listJournals.items;
+        this.journalEntries = _.orderBy(res.data.listJournals.items, 'createdAt','desc');
         this.logger.info(`Entries successfully listed`, res)
       })
       .catch((e) => {

@@ -46,10 +46,12 @@ $ Do you want a guided schema creation? Y
 $ > Single object with fields (e.g. "Todo" with id, name description)
 $ Do you want to edit the schema now? Y
 
-  type Todo @model {
+  type Journal @model {
   id: ID!
-  note: String!
-  done: Boolean
+  title: String!
+  body: String
+  createdAt: String
+  updatedAt: String
 }
 
 $ amplify push

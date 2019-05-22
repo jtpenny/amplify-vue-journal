@@ -19,10 +19,19 @@ import router from './router';
 import Amplify from 'aws-amplify';
 import aws_exports from './aws-exports';
 import { components } from 'aws-amplify-vue'; 
+import orderBy from 'lodash';
+
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
+Vue.use(BootstrapVue)
+Vue.use(require('vue-moment'));
 
 Vue.config.productionTip = false
 
 Amplify.configure(aws_exports)
+
 
 /* eslint-disable no-new */
 new Vue({

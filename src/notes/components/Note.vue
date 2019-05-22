@@ -12,9 +12,13 @@
  */
 
 <template>
-  <ul>
-  <li v-for="(value, key) in entry"> {{key}}:  {{ value }} </li>
-  </ul>
+<div class="container" style="text-align:left">
+  <h2> {{ entry.title }} </h2>
+  <p style="white-space: pre-wrap;"> {{ entry.body }} </p>
+  <p> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+  <p> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+  
+</div>
 </template>
 <script>
 import Vue from 'vue'
@@ -23,7 +27,7 @@ import { JS } from 'fsts'
 
 import AmplifyStore from '../../store/store'
 
-import  { ListEntries }  from './persist/graphqlActions';
+import  { GetEntry }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
 import Note from './Note'
@@ -38,7 +42,7 @@ export default {
       filter: 'all',
       logger: {},
       actions: {
-        list: ListEntries,
+        get: GetEntry,
       },
     }
   },
@@ -51,11 +55,11 @@ export default {
   },
   methods: {
     get() {
-      
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, { id : this.$route.params.id }))
+      console.log(this.$route.params.id)
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.get, { id : this.$route.params.id }))
       .then((res) => {
         console.log(res.data)
-        this.entry = res.data.listJournals.items[0];
+        this.entry = res.data.getJournal;
         this.logger.info(`Todo successfully listed`, res)
       })
       .catch((e) => {

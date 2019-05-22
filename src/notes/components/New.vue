@@ -1,9 +1,16 @@
 <template>
-  <form @submit.prevent="create">
-  <input v-model="title" placeholder="Title"><br>
-  <textarea  v-model="body" placeholder="Enter Entry Here..."></textarea><br>
-  <button type="submit">Submit</button>
-  </form>
+
+<div class="container" style="text-align:left;">
+  <b-form @submit.prevent="create">
+    <b-form-group label="Title:" label-for="form-title">
+      <b-form-input id="form-title" v-model="title" placeholder="Title"></b-form-input>
+    </b-form-group>
+    <b-form-group label="Body:" label-for="form-body">
+      <b-form-textarea  id="form-body" v-model="body" placeholder="Enter Body Here..."></b-form-textarea>
+    </b-form-group>
+    <b-button type="submit" variant="primary">Submit</b-button>
+  </b-form>
+</div>
 </template>
 <script>
 
@@ -44,6 +51,7 @@ export default {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.create, {title: this.title, body: this.body }))
       .then((res) => {
         this.logger.info(`Entry created`, res);
+        this.$router.push({ path: '/note/'+res.data.createJournal.id })
       })
       .catch((e) => {
         this.logger.error(`Error creating Entry`, e)

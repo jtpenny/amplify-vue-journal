@@ -58,6 +58,7 @@ h5 {
 .container {
   text-align: center;
   margin-left: 30px;
+  width: calc(100% - 30px);
 }
 .shifted {
   text-align: left;

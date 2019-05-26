@@ -1,4 +1,4 @@
-const CreateEntry = `mutation createTodo($title: String!, $body: String) {
+const CreateEntry = `mutation createJournal($title: String!, $body: String) {
   createJournal(input: {title: $title,body:$body}) {
     id
     title
@@ -17,7 +17,7 @@ const GetEntry = `query($id: ID!) {
 }`;
 
 const ListEntries = `query {
-  listJournals {
+  listJournals(limit:99) {
     items {
       id
       title
@@ -28,11 +28,24 @@ const ListEntries = `query {
   }
 }`;
 
-const UpdateTodo = `mutation updateTodo($id: ID!, $note: String, $done: Boolean) {
-  updateTodo(input: {id: $id, note: $note, done: $done}) {
+const ListUserJournals = `query {
+	getUserJournals {
+	  items {
+	  id
+      title
+      timestamp
+      createdAt
+      } 	
+	}
+}`;
+
+const UpdateJournal = `mutation updateJournal($id: ID!, $title: String, $body: String) {
+  updateJournal(input: {id: $id, title: $title, body: $body}) {
     id
-    note
-    done
+      title
+      body
+      createdAt
+      updatedAt	
   }
 }`;
 
@@ -48,5 +61,6 @@ export {
   ListEntries,
   GetEntry,
   UpdateTodo,
-  DeleteTodo
+  DeleteTodo,
+  ListUserJournals
 }

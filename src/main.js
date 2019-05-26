@@ -38,6 +38,12 @@ new Vue({
   el: '#app',
   router: router,
   template: '<App/>',
+  data () {
+    return {
+      theme: NotesTheme || {},
+      journalEntries: []
+     }
+  },
   components: { 
     App,
     ...components

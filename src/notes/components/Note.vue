@@ -13,13 +13,33 @@
 
 <template>
 <div class="container" style="text-align:left">
-  <h2> {{ entry.title }} </h2>
-  <p style="white-space: pre-wrap;"> {{ entry.body }} </p>
-  <p> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
-  <p> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+  <b-alert variant="success" v-if="success">{{success}}</b-alert>
+  <b-form @submit.prevent="update">
+    <h2>
+      <label for="form-title"  v-if="!plaintext" >Title:</label>
+      <b-form-input id="form-title" v-model="entry.title" placeholder="Title" :plaintext=plaintext></b-form-input>
+    </h2>
+    <label for="form-body"  v-if="!plaintext" >Body:</label>
+    <b-form-textarea  id="form-body" v-model="entry.body" placeholder="Enter Body Here..." :plaintext=plaintext></b-form-textarea>
+    <p v-if="plaintext"> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+    <p v-if="plaintext"> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+    <b-button @click="edit" variant="primary" v-if="plaintext">Edit</b-button>
+    <b-button @click="remove" variant="danger" v-if="plaintext">Delete</b-button>
+    <b-button type="submit" variant="primary" v-if="!plaintext">Submit</b-button> 
+    <b-button @click="cancel" variant="warning" v-if="!plaintext">Cancel</b-button> 
+  </b-form>
   
 </div>
 </template>
+
+<style>
+
+
+button { 
+  margin:12px;
+}
+</style>
+
 <script>
 import Vue from 'vue'
 import { Logger } from 'aws-amplify'
@@ -39,8 +59,10 @@ export default {
       theme: NotesTheme || {},
       note: '',
       entry: {},
+      success:false,
       filter: 'all',
       logger: {},
+      plaintext: true,
       actions: {
         get: GetEntry,
       },
@@ -54,6 +76,12 @@ export default {
     userId: function() { return AmplifyStore.state.userId }
   },
   methods: {
+    edit() {
+      this.plaintext=false;
+    },
+    cancel() {
+      this.plaintext=true;
+    },
     get() {
       console.log(this.$route.params.id)
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.get, { id : this.$route.params.id }))

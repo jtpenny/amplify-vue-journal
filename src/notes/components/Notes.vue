@@ -12,16 +12,31 @@
  */
 
 <template>
-  <div :style="theme.container">
+  <b-container :style="theme.container">
     <h2 :style="theme.header">Notes</h2>
     <router-link :to="'/note/create'" tag="b-button">New Entry</router-link><br>
-    <ul :style="theme.list">
-      <li v-for="entry in journalEntries" v-bind:key="entry.id">
-        <router-link :to="'/note/'+entry.id">{{ entry.title }}</router-link> {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }}
-      </li>
-    </ul>
-  </div>
+      <b-row v-for="(entry,index) in journalEntries" v-bind:key="entry.id" >
+        <b-col md="3" />
+        <b-col md="3 entry" :class="{even: index % 2, odd: !(index % 2)}"><router-link :to="'/note/'+entry.id">{{ entry.title }}</router-link></b-col>
+        <b-col md="3 entry" :class="{even: index % 2, odd: !(index % 2)}"> {{ entry.timestamp | moment("MMMM Do YYYY, h:mm:ss a") }} </b-col>
+    </b-row>
+  </b-container>
 </template>
+
+<style scoped>
+	.entry {
+		text-align:left;
+		padding:12px;
+	}
+	
+	.even {
+		background-color: #eeeeee;	
+	}
+	
+	.odd {
+		background-color: white;
+	}
+</style>
 
 <script>
 import Vue from 'vue'
@@ -31,7 +46,7 @@ import moment from 'moment'
 
 import AmplifyStore from '../../store/store'
 
-import  { ListEntries }  from './persist/graphqlActions';
+import  { ListUserJournals }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
 
@@ -43,10 +58,11 @@ export default {
     return {
       theme: NotesTheme || {},
       journalEntries: [],
+      userID: AmplifyStore.state.user.username,
       filter: 'all',
       logger: {},
       actions: {
-        list: ListEntries,
+        list: ListUserJournals,
       },
     }
   },
@@ -61,7 +77,8 @@ export default {
     list() {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, {}))
       .then((res) => {
-        this.journalEntries = _.orderBy(res.data.listJournals.items, 'createdAt','desc');
+        this.journalEntries = res.data.getUserJournals.items;
+        //this.journalEntries = _.orderBy(res.data.listJournals.items, 'timestamp','desc');
         this.logger.info(`Entries successfully listed`, res)
       })
       .catch((e) => {

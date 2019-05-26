@@ -6,7 +6,7 @@
       <b-form-input id="form-title" v-model="title" placeholder="Title"></b-form-input>
     </b-form-group>
     <b-form-group label="Body:" label-for="form-body">
-      <b-form-textarea  id="form-body" v-model="body" placeholder="Enter Body Here..."></b-form-textarea>
+      <b-form-textarea rows="3" max-rows="10"  id="form-body" v-model="body" placeholder="Enter Body Here..."></b-form-textarea>
     </b-form-group>
     <b-button type="submit" variant="primary">Submit</b-button>
   </b-form>

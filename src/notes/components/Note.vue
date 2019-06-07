@@ -20,7 +20,7 @@
       <b-form-input id="form-title" v-model="entry.title" placeholder="Title" :plaintext=plaintext></b-form-input>
     </h2>
     <label for="form-body"  v-if="!plaintext" >Body:</label>
-    <b-form-textarea  id="form-body" v-model="entry.body" placeholder="Enter Body Here..." :plaintext=plaintext></b-form-textarea>
+    <b-form-textarea  id="form-body" v-model="entry.body" rows="3" max-rows="10" placeholder="Enter Body Here..." :plaintext=plaintext></b-form-textarea>
     <p v-if="plaintext"> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
     <p v-if="plaintext"> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
     <b-button @click="edit" variant="primary" v-if="plaintext">Edit</b-button>
@@ -47,7 +47,7 @@ import { JS } from 'fsts'
 
 import AmplifyStore from '../../store/store'
 
-import  { GetEntry }  from './persist/graphqlActions';
+import  { GetEntry,UpdateJournal }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
 import Note from './Note'
@@ -65,6 +65,7 @@ export default {
       plaintext: true,
       actions: {
         get: GetEntry,
+        updateJournal: UpdateJournal
       },
     }
   },
@@ -93,6 +94,10 @@ export default {
       .catch((e) => {
         this.logger.error(`Error listing Todos`, e)
       });
+    },
+    update() {
+    //	this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.update, {id: todo.id, note: todo.note, done: !todo.done}))
+    //    .then((res) => {
     }
     /*
     toggle(todo) {

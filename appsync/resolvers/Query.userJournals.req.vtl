@@ -1,0 +1,33 @@
+#TEST
+{
+    "version" : "2017-02-28",
+    "operation" : "Query",
+    "index" : "usercreatedat",
+    "query" : {
+        "expression": "#userID = :userID",
+        "expressionNames" : {
+        "#userID" : "userID"
+    },
+        "expressionValues" : {  ":userID" : $util.dynamodb.toDynamoDBJson($ctx.identity.username)  }
+    },
+    "filter":   #if( $context.args.filter )
+        $util.transform.toDynamoDBFilterExpression($ctx.args.filter)
+    #else
+        null
+    #end,
+    "limit": #if( $context.args.limit )
+         "$context.args.limit"
+    #else
+        null
+    #end,
+    "nextToken":   #if( $context.args.nextToken )
+        "$context.args.nextToken"
+    #else
+        null
+    #end,
+    "scanIndexForward": #if( $context.args.sort == "DESC" )
+        false
+    #else
+        null
+    #end
+}

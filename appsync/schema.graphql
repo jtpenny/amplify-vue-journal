@@ -1,0 +1,78 @@
+type Journal @model 
+  @key(name: "usercreatedat", fields: ["userID", "createdAt"]) 
+  @auth(rules: [{allow: owner, ownerField: "userID"}]) {
+  id: ID
+  userID: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  title: String!
+  body: String
+}
+
+type ModelJournalConnection {
+	items: [Journal]
+	nextToken: String
+}
+
+input ModelStringKeyConditionInput {
+	eq: String
+	le: String
+	lt: String
+	ge: String
+	gt: String
+	between: [String]
+	beginsWith: String
+}
+
+input ModelJournalFilterInput {
+	id: ModelIDFilterInput
+	userID: ModelStringFilterInput
+	createdAt: ModelStringFilterInput
+	title: ModelStringFilterInput
+	body: ModelStringFilterInput
+	and: [ModelJournalFilterInput]
+	or: [ModelJournalFilterInput]
+	not: ModelJournalFilterInput
+}
+
+enum ModelSortDirection {
+	ASC
+	DESC
+}
+
+input ModelIDFilterInput {
+	ne: ID
+	eq: ID
+	le: ID
+	lt: ID
+	ge: ID
+	gt: ID
+	contains: ID
+	notContains: ID
+	between: [ID]
+	beginsWith: ID
+}
+
+input ModelStringFilterInput {
+	ne: String
+	eq: String
+	le: String
+	lt: String
+	ge: String
+	gt: String
+	contains: String
+	notContains: String
+	between: [String]
+	beginsWith: String
+}
+
+type Query {
+  userJournals(
+		userID: String,
+		createdAt: ModelStringKeyConditionInput,
+		filter: ModelJournalFilterInput,
+		limit: Int,
+    sort: ModelSortDirection
+		nextToken: String
+	): ModelJournalConnection
+}

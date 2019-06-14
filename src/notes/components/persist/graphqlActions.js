@@ -1,4 +1,4 @@
-const CreateEntry = `mutation createTodo($title: String!, $body: String) {
+const CreateEntry = `mutation createJournal($title: String!, $body: String) {
   createJournal(input: {title: $title,body:$body}) {
     id
     title
@@ -17,13 +17,11 @@ const GetEntry = `query($id: ID!) {
 }`;
 
 const ListEntries = `query {
-  listJournals {
+  userJournals(sort:DESC ) {
     items {
       id
       title
-      body
       createdAt
-      updatedAt
     }
   }
 }`;

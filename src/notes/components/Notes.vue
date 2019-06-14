@@ -59,9 +59,9 @@ export default {
   },
   methods: {
     list() {
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list, {}))
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.list))
       .then((res) => {
-        this.journalEntries = _.orderBy(res.data.listJournals.items, 'createdAt','desc');
+        this.journalEntries = _.orderBy(res.data.userJournals.items, 'createdAt','desc');
         this.logger.info(`Entries successfully listed`, res)
       })
       .catch((e) => {

@@ -27,6 +27,3 @@ dist/
 node_modules/
 aws-exports.js
 awsconfiguration.json
-.graphqlconfig.yml
-package-lock.json
-src/graphql/

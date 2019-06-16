@@ -13,13 +13,33 @@
 
 <template>
 <div class="container" style="text-align:left">
-  <h2> {{ entry.title }} </h2>
-  <p style="white-space: pre-wrap;"> {{ entry.body }} </p>
-  <p> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
-  <p> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+  <b-alert variant="success" v-if="success">{{success}}</b-alert>
+  <b-form>
+    <h2>
+      <label for="form-title"  v-if="!plaintext" >Title:</label>
+      <b-form-input id="form-title" v-model="entry.title" placeholder="Title" :plaintext=plaintext></b-form-input>
+    </h2>
+    <label for="form-body"  v-if="!plaintext" >Body:</label>
+    <b-form-textarea  id="form-body" v-model="entry.body" rows="3" max-rows="10" placeholder="Enter Body Here..." :plaintext=plaintext></b-form-textarea>
+    <p v-if="plaintext"> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+    <p v-if="plaintext"> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
+    <b-button @click="edit" variant="primary" v-if="plaintext">Edit</b-button>
+    <b-button @click="remove" variant="danger" v-if="plaintext">Delete</b-button>
+    <b-button @click="updateMe"  variant="primary" v-if="!plaintext">Submit</b-button> 
+    <b-button @click="cancel" variant="warning" v-if="!plaintext">Cancel</b-button> 
+  </b-form>
   
 </div>
 </template>
+
+<style>
+
+
+button { 
+  margin:12px;
+}
+</style>
+
 <script>
 import Vue from 'vue'
 import { Logger } from 'aws-amplify'
@@ -27,7 +47,7 @@ import { JS } from 'fsts'
 
 import AmplifyStore from '../../store/store'
 
-import  { GetEntry }  from './persist/graphqlActions';
+import  { GetEntry,UpdateEntry,DeleteEntry }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
 import Note from './Note'
@@ -38,11 +58,15 @@ export default {
     return {
       theme: NotesTheme || {},
       note: '',
+      plaintext: true,
       entry: {},
       filter: 'all',
       logger: {},
+      success: false,
       actions: {
         get: GetEntry,
+        update:UpdateEntry,
+        delete:DeleteEntry
       },
     }
   },
@@ -54,6 +78,12 @@ export default {
     userId: function() { return AmplifyStore.state.userId }
   },
   methods: {
+    edit() {
+      this.plaintext=false;
+    },
+    cancel() {
+      this.plaintext=true;
+    },
     get() {
       console.log(this.$route.params.id)
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.get, { id : this.$route.params.id }))
@@ -65,7 +95,53 @@ export default {
       .catch((e) => {
         this.logger.error(`Error listing Todos`, e)
       });
-    }
+    },
+    updateMe() {
+      console.log('UpdateMe');
+      console.log(this.entry)
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.update, {id: this.entry.id, title: this.entry.title, body: this.entry.body }))
+      .then((res) => {
+        this.logger.info(`Entry updated`, res);
+        this.success = 'Journal Updated.';
+        this.plaintext= true;
+        this.entry = res.data.updateJournal;
+      })
+      .catch((e) => {
+        this.logger.error(`Error creating Entry`, e)
+      })
+    },
+    remove() {
+      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete '+this.entry.title+'.', {
+          title: 'Please Confirm',
+          size: 'sm',
+          buttonSize: 'sm',
+          okVariant: 'danger',
+          okTitle: 'YES',
+          cancelTitle: 'NO',
+          footerClass: 'p-2',
+          hideHeaderClose: false,
+          centered: true
+        })
+          .then(value => {
+            if (value==true) {
+              this.delete(this.entry.id);
+            }
+            
+          })
+        //  .catch(err => {
+            // An error occurred
+        //  })
+    },
+    delete(id) {
+      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.delete, {id}))
+      .then((res) => {
+        this.logger.info(`Journal ${id} removed`, res);
+        this.$router.push({ path: '/notes' })
+      })
+      .catch((e) => {
+        this.logger.error(`Error removing Todo ${id}`, e)
+      })
+    },
     /*
     toggle(todo) {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.update, {id: todo.id, note: todo.note, done: !todo.done}))
@@ -77,16 +153,7 @@ export default {
           this.logger.error(`Error toggling Todo ${todo.id} done status`, e)
         })
     },
-    remove(id) {
-      this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.delete, {id}))
-      .then((res) => {
-        this.logger.info(`Todo ${id} removed`, res);
-        this.list();
-      })
-      .catch((e) => {
-        this.logger.error(`Error removing Todo ${id}`, e)
-      })
-    },
+    
     create() {
       this.$Amplify.API.graphql(this.$Amplify.graphqlOperation(this.actions.create, {note: this.note, done: true}))
       .then((res) => {

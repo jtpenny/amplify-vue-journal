@@ -1,0 +1,35 @@
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+     # key: "value"
+  #parameter-store:
+     # key: "value"
+     # key: "value"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+      # name: version
+    #commands:
+      # - command
+      # - command
+  #pre_build:
+    #commands:
+      # - command
+      # - command
+  build:
+    commands:
+      - aws --region=$PARAMETER_REGION ssm get-parameter --name "$PARAMETER_NAME" --output text --query Parameter.Value > $CODEBUILD_SRC_DIR/src/aws-exports.js
+      - npm install
+      - npm run-script build
+  #post_build:
+    #commands:
+      # - command
+      # - command
+artifacts:
+  base-directory: dist
+  files:
+    - '**/*'

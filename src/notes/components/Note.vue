@@ -20,7 +20,10 @@
       <b-form-input id="form-title" v-model="entry.title" placeholder="Title" :plaintext=plaintext></b-form-input>
     </h2>
     <label for="form-body"  v-if="!plaintext" >Body:</label>
-    <b-form-textarea  id="form-body" v-model="entry.body" rows="3" max-rows="10" placeholder="Enter Body Here..." :plaintext=plaintext></b-form-textarea>
+    <div v-html="entry.body" v-if="plaintext"></div>
+    <p>
+    <tinymce-editor v-model="entry.body" v-if="!plaintext" :init="{menubar: 'edit format', plugins:'link'}"></tinymce-editor>
+    </p>
     <p v-if="plaintext"> Created: {{ entry.createdAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
     <p v-if="plaintext"> Last Updated:  {{ entry.updatedAt | moment("MMMM Do YYYY, h:mm:ss a") }} </p> 
     <b-button @click="edit" variant="primary" v-if="plaintext">Edit</b-button>
@@ -28,16 +31,14 @@
     <b-button @click="updateMe"  variant="primary" v-if="!plaintext">Submit</b-button> 
     <b-button @click="cancel" variant="warning" v-if="!plaintext">Cancel</b-button> 
   </b-form>
-  
+  <amplify-s3-album :path=albumPath :s3AlbumConfig=s3AlbumConfig></amplify-s3-album>
+   <amplify-photo-picker :photoPickerConfig=photoPickerConfig></amplify-photo-picker>
+   
 </div>
 </template>
 
 <style>
-
-
-button { 
-  margin:12px;
-}
+.mce-notification-inner {display:none!important;}
 </style>
 
 <script>
@@ -51,6 +52,7 @@ import  { GetEntry,UpdateEntry,DeleteEntry }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
 import Note from './Note'
+import Editor from '@tinymce/tinymce-vue';
 
 export default {
   name: 'Notes',
@@ -59,6 +61,17 @@ export default {
       theme: NotesTheme || {},
       note: '',
       plaintext: true,
+      id: this.$route.params.id,
+      photoPickerConfig: {
+        path: this.$route.params.id+'/',
+        storageOptions: {
+          level: 'private'
+        }
+      },
+      s3AlbumConfig: {
+          level: 'private'
+      },
+      albumPath: this.$route.params.id+'/',
       entry: {},
       filter: 'all',
       logger: {},
@@ -76,6 +89,9 @@ export default {
   },
   computed: {
     userId: function() { return AmplifyStore.state.userId }
+  },
+  components: {
+    'tinymce-editor': Editor // <- Important part
   },
   methods: {
     edit() {

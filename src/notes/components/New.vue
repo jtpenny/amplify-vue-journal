@@ -6,12 +6,21 @@
       <b-form-input id="form-title" v-model="title" placeholder="Title"></b-form-input>
     </b-form-group>
     <b-form-group label="Body:" label-for="form-body">
-      <b-form-textarea rows="3" max-rows="10"  id="form-body" v-model="body" placeholder="Enter Body Here..."></b-form-textarea>
+      <tinymce-editor v-model="body" :init="{menubar: 'edit format insert', plugins: 'wordcount',baseURL:'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.11/'}"></tinymce-editor>
     </b-form-group>
     <b-button type="submit" variant="primary">Submit</b-button>
   </b-form>
 </div>
 </template>
+
+<style>
+
+
+button { 
+  margin:12px;
+}
+</style>
+
 <script>
 
 import Vue from 'vue'
@@ -23,9 +32,11 @@ import AmplifyStore from '../../store/store'
 import  { CreateEntry }  from './persist/graphqlActions';
 
 import NotesTheme from '../NotesTheme'
+import Editor from '@tinymce/tinymce-vue';
 
 export default {
   name: 'New',
+  editor: Editor,
   data () {
     return {
       theme: NotesTheme || {},
@@ -45,6 +56,9 @@ export default {
   },
   computed: {
     userId: function() { return AmplifyStore.state.userId }
+  },
+  components: {
+    'tinymce-editor': Editor // <- Important part
   },
   methods: {
     create() {

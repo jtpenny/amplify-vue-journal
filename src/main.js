@@ -25,6 +25,12 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+tinyMCE.baseURL = "https://cdn.jsdelivr.net/npm/tinymce@5.0.11";
+
+import tinymce from 'tinymce/tinymce';
+//require('tinymce/themes/silver');
+import Editor from '@tinymce/tinymce-vue';
+
 Vue.use(BootstrapVue)
 Vue.use(require('vue-moment'));
 

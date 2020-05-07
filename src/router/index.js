@@ -14,13 +14,12 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import { Menu, Home, Profile } from '@/components';
-import { Notes } from '@/notes';
-import { Note } from '@/notes';
-import { New as NewNote } from '@/notes';
-import { components, AmplifyEventBus } from 'aws-amplify-vue';
+import { Notes, Note, New as NewNote } from '@/notes';
+import { components, AmplifyEventBus, AmplifyPlugin } from 'aws-amplify-vue';
 import Amplify, * as AmplifyModules from 'aws-amplify';
-import { AmplifyPlugin } from 'aws-amplify-vue';
 import AmplifyStore from '../store/store';
+
+import { SocialAuth,SocialAuthCallback} from 'amplify-vue-social-auth';
 
 
 Vue.use(Router);
@@ -59,6 +58,7 @@ function getUser() {
 }
 
 const router = new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -99,7 +99,13 @@ const router = new Router({
     {
       path: '/auth',
       name: 'Authenticator',
-      component: components.Authenticator
+      component: SocialAuth
+    },
+    {
+      path: '/callback',
+      name: 'callback',
+      component: SocialAuthCallback,
+      meta: { requiresAuth: false}
     }
   ]
 });
